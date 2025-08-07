@@ -8,27 +8,43 @@ export default function AquaclimaDashboard() {
   const [chatInput, setChatInput] = useState('');
   const [chatOutput, setChatOutput] = useState('');
 
-  const FIREBASE_URL = "https://your-project-id.firebaseio.com";
-  const HF_API_KEY = "your_huggingface_api_key";
+  // Mock sensor data for demo purposes
+  const mockSensorData = {
+    temperature: 23.5,
+    ph: 7.2,
+    dissolved_oxygen: 8.4,
+    turbidity: 2.1,
+    water_level: 85,
+    flow_rate: 12.3,
+    conductivity: 450,
+    timestamp: new Date().toLocaleString()
+  };
 
   const fetchSensorData = async () => {
     try {
-      const response = await axios.get(`${FIREBASE_URL}/sensor_data.json`);
-      setSensorData(response.data);
-      setPumpStatus(response.data.pump || false);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setSensorData(mockSensorData);
+      setPumpStatus(Math.random() > 0.5); // Random pump status for demo
       setLoading(false);
     } catch (error) {
       console.error('Error fetching sensor data:', error);
+      // Fallback to mock data
+      setSensorData(mockSensorData);
+      setLoading(false);
     }
   };
 
   const togglePump = async () => {
     try {
       const newStatus = !pumpStatus;
-      await axios.put(`${FIREBASE_URL}/actuators.json`, { pump: newStatus });
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 300));
       setPumpStatus(newStatus);
     } catch (error) {
       console.error('Error updating pump status:', error);
+      // Still toggle for demo purposes
+      setPumpStatus(!pumpStatus);
     }
   };
 
@@ -48,18 +64,32 @@ export default function AquaclimaDashboard() {
 
   useEffect(() => {
     fetchSensorData();
-    const interval = setInterval(fetchSensorData, 30000);
+    const interval = setInterval(() => {
+      // Update mock data with slight variations
+      setSensorData(prev => ({
+        ...prev,
+        temperature: (23 + Math.random() * 4).toFixed(1),
+        ph: (7 + Math.random() * 0.8).toFixed(1),
+        dissolved_oxygen: (8 + Math.random() * 2).toFixed(1),
+        turbidity: (2 + Math.random()).toFixed(1),
+        water_level: Math.floor(80 + Math.random() * 20),
+        flow_rate: (12 + Math.random() * 2).toFixed(1),
+        conductivity: Math.floor(400 + Math.random() * 100),
+        timestamp: new Date().toLocaleString()
+      }));
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) return <p style={{ padding: 20 }}>Loading AQUACLIMA data...</p>;
-
-  return (
-    <div style={{ fontFamily: 'sans-serif', padding: 20, background: '#e0f7fa', minHeight: '100vh' }}>
-      <h1 style={{ fontSize: 32, fontWeight: 'bold' }}>🌿 AQUACLIMA Dashboard</h1>
-
-      <div style={{ marginTop: 20 }}>
-        {Object.entries(sensorData).map(([key, value]) => (
+  // Remove the loading screen that was causing issues
+  // if (loading) {
+  //   return (
+  //     <div className="loading">
+  //       <div className="loading-spinner"></div>
+  //       Loading AQUACLIMA Dashboard...
+  //     </div>
+  //   );
+  // }
           key !== 'pump' && (
             <div key={key} style={{ marginBottom: 10 }}>
               <strong>{key.replace(/_/g, ' ')}:</strong> {value}
