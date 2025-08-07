@@ -98,11 +98,11 @@ export default function AquaclimaDashboard() {
       <div style={{ background: '#f0f8ff', padding: 20, borderRadius: 8 }}>
         <h2>📊 Sensor Data</h2>
         {sensorData && Object.entries(sensorData).map(([key, value]) => (
-          key !== 'pump' && (
+          key !== 'pump' ? (
             <div key={key} style={{ marginBottom: 10 }}>
               <strong>{key.replace(/_/g, ' ')}:</strong> {value}
             </div>
-          )
+          ) : null
         ))}
         <div>
           <strong>Pump Status:</strong> {pumpStatus ? 'ON' : 'OFF'}
