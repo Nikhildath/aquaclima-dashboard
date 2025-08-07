@@ -92,37 +92,80 @@ export default function AquaclimaDashboard() {
   // }
 
   return (
-    <div style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
-      <h1>🌊 AQUACLIMA Dashboard</h1>
-      
-      <div style={{ background: '#f0f8ff', padding: 20, borderRadius: 8 }}>
-        <h2>📊 Sensor Data</h2>
-        {sensorData && Object.entries(sensorData).map(([key, value]) => (
-          key !== 'pump' ? (
-            <div key={key} style={{ marginBottom: 10 }}>
-              <strong>{key.replace(/_/g, ' ')}:</strong> {value}
+    <div className="container">
+      <div className="header">
+        <h1 className="logo">🌊 AQUACLIMA</h1>
+        <p className="subtitle">Advanced Water Quality Monitoring System</p>
+      </div>
+
+      <div className="dashboard-grid">
+        <div className="card">
+          <h2 className="card-title">📊 Sensor Readings</h2>
+          <div className="sensor-grid">
+            <div className="sensor-item">
+              <div className="sensor-label">Temperature</div>
+              <div className="sensor-value">{sensorData?.temperature || '--'}°C</div>
             </div>
-          ) : null
-        ))}
-        <div>
-          <strong>Pump Status:</strong> {pumpStatus ? 'ON' : 'OFF'}
-          <button onClick={togglePump} style={{ marginLeft: 10 }}>
-            Toggle Pump
-          </button>
+            <div className="sensor-item">
+              <div className="sensor-label">pH Level</div>
+              <div className="sensor-value">{sensorData?.ph || '--'}</div>
+            </div>
+            <div className="sensor-item">
+              <div className="sensor-label">Dissolved Oxygen</div>
+              <div className="sensor-value">{sensorData?.dissolved_oxygen || '--'} mg/L</div>
+            </div>
+            <div className="sensor-item">
+              <div className="sensor-label">Turbidity</div>
+              <div className="sensor-value">{sensorData?.turbidity || '--'} NTU</div>
+            </div>
+            <div className="sensor-item">
+              <div className="sensor-label">Water Level</div>
+              <div className="sensor-value">{sensorData?.water_level || '--'} cm</div>
+            </div>
+            <div className="sensor-item">
+              <div className="sensor-label">Flow Rate</div>
+              <div className="sensor-value">{sensorData?.flow_rate || '--'} L/min</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h2 className="card-title">⚙️ Pump Control</h2>
+          <div className="pump-control">
+            <div className={`pump-status ${pumpStatus ? 'on' : 'off'}`}>
+              <div className="status-indicator"></div>
+              Pump {pumpStatus ? 'ON' : 'OFF'}
+            </div>
+            <button className="pump-button" onClick={togglePump}>
+              {pumpStatus ? 'Stop Pump' : 'Start Pump'}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div style={{ marginTop: 40, background: '#fff', padding: 20, borderRadius: 8 }}>
-        <h2>🤖 AQUACLIMA Assistant</h2>
-        <input
-          type="text"
-          value={chatInput}
-          onChange={e => setChatInput(e.target.value)}
-          placeholder="Ask something about your water system..."
-          style={{ padding: 10, width: '80%' }}
-        />
-        <button onClick={handleAskBot} style={{ marginLeft: 10 }}>Ask</button>
-        <p style={{ marginTop: 10 }}><strong>Assistant:</strong> {chatOutput}</p>
+      <div className="card chat-section">
+        <h2 className="card-title">🤖 AQUACLIMA Assistant</h2>
+        <div className="chat-input-container">
+          <input
+            type="text"
+            className="chat-input"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && !chatLoading && handleAskBot()}
+            placeholder="Ask about water temperature, pH levels, pump operations..."
+            disabled={chatLoading}
+          />
+          <button 
+            className="chat-button" 
+            onClick={handleAskBot}
+            disabled={chatLoading || !chatInput.trim()}
+          >
+            {chatLoading ? 'Thinking...' : 'Ask'}
+          </button>
+        </div>
+        <div className="chat-output">
+          {chatOutput || "👋 Hi! I'm your AQUACLIMA assistant. Ask me about your water system parameters!"}
+        </div>
       </div>
     </div>
   );
