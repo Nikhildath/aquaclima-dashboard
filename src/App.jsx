@@ -90,6 +90,14 @@ export default function AquaclimaDashboard() {
   //     </div>
   //   );
   // }
+
+  return (
+    <div style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
+      <h1>🌊 AQUACLIMA Dashboard</h1>
+      
+      <div style={{ background: '#f0f8ff', padding: 20, borderRadius: 8 }}>
+        <h2>📊 Sensor Data</h2>
+        {sensorData && Object.entries(sensorData).map(([key, value]) => (
           key !== 'pump' && (
             <div key={key} style={{ marginBottom: 10 }}>
               <strong>{key.replace(/_/g, ' ')}:</strong> {value}
