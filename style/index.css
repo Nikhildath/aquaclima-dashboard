@@ -103,16 +103,14 @@ body {
   bottom: 0;
   z-index: -1;
   overflow: hidden;
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #667eea 100%);
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 50%, #667eea 100%);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
 }
 
 @keyframes gradientShift {
   0% { background-position: 0% 50%; }
-  25% { background-position: 100% 0%; }
   50% { background-position: 100% 50%; }
-  75% { background-position: 0% 100%; }
   100% { background-position: 0% 50%; }
 }
 .floating-particles {
@@ -140,23 +138,13 @@ body {
 }
 
 .floating-particles::after {
-  top: 60%;
-  right: 10%;
-  animation-delay: -10s;
-}
-
-/* Additional floating elements */
-.floating-particles::after {
-  content: '';
-  position: absolute;
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
-  border-radius: 50%;
-  top: 30%;
-  left: 70%;
-  animation: float 30s infinite linear reverse;
-  animation-delay: -15s;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(245, 87, 108, 0.15) 0%, rgba(240, 147, 251, 0.1) 50%, transparent 70%);
+  top: 70%;
+  left: 20%;
+  animation: float 35s infinite linear reverse;
+  animation-delay: -20s;
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); }
