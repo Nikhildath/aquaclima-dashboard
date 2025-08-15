@@ -431,7 +431,7 @@ body {
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   outline: none;
   position: relative;
@@ -567,7 +567,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--spacing-lg);
-  transition: all var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -578,8 +578,8 @@ body {
 }
 
 .status-card:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-4px);
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
 }
 
 .status-indicator {
@@ -724,7 +724,7 @@ body {
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--gray-200);
-  transition: all var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -735,8 +735,8 @@ body {
 }
 
 .sensor-card:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-4px);
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
 }
 
 .sensor-header {
@@ -763,7 +763,7 @@ body {
   border-radius: var(--radius-lg);
   border: 1px solid var(--gray-200);
   color: var(--primary-color);
-  transition: all var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sensor-card:hover .sensor-icon {
@@ -1077,7 +1077,7 @@ body {
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--gray-200);
-  transition: all var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -1088,8 +1088,8 @@ body {
 }
 
 .info-card:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-4px);
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
 }
 
 .info-header {
@@ -1116,7 +1116,7 @@ body {
   border-radius: var(--radius-lg);
   border: 1px solid var(--gray-200);
   color: var(--primary-color);
-  transition: all var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .info-card:hover .info-icon {
