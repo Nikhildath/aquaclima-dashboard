@@ -719,26 +719,24 @@ body {
 }
 
 .sensor-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: white;
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
 }
 
 [data-theme="dark"] .sensor-card {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--gray-100);
+  border-color: var(--gray-200);
 }
 
 .sensor-card:hover {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  transform: translateY(-8px) scale(1.02);
-  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
 }
 
 .sensor-header {
@@ -795,10 +793,17 @@ body {
   font-weight: 800;
   color: var(--primary-color);
   margin-bottom: var(--spacing-sm);
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, var(--primary-color), var(--success-color), var(--info-color));
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: gradientText 3s ease infinite;
+}
+
+@keyframes gradientText {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .sensor-status {
