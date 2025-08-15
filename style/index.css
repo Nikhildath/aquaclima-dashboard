@@ -138,13 +138,23 @@ body {
 }
 
 .floating-particles::after {
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(245, 87, 108, 0.15) 0%, rgba(240, 147, 251, 0.1) 50%, transparent 70%);
-  top: 70%;
-  left: 20%;
-  animation: float 35s infinite linear reverse;
-  animation-delay: -20s;
+  top: 60%;
+  right: 10%;
+  animation-delay: -10s;
+}
+
+/* Additional floating elements */
+.floating-particles::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  top: 30%;
+  left: 70%;
+  animation: float 30s infinite linear reverse;
+  animation-delay: -15s;
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); }
@@ -237,18 +247,19 @@ body {
 
 /* Header */
 .header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(25px) saturate(180%);
   border-bottom: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
   transition: all var(--transition-normal);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="dark"] .header {
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(15, 23, 42, 0.85);
   border-bottom-color: var(--gray-200);
 }
 
