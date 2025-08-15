@@ -1783,84 +1783,205 @@ body {
 /* Responsive Design */
 @media (max-width: 1024px) {
   .header-container {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  
+  .brand {
+    order: 1;
+    flex: 1;
+    min-width: 200px;
   }
   
   .header-actions {
-    width: 100%;
-    justify-content: space-between;
+    order: 2;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
   }
   
   .tab-list {
     overflow-x: auto;
     padding-bottom: var(--spacing-sm);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .tab-list::-webkit-scrollbar {
+    display: none;
   }
   
   .tab-btn {
     white-space: nowrap;
+    min-width: 120px;
+    justify-content: center;
   }
 }
 
 @media (max-width: 768px) {
+  :root {
+    --spacing-xs: 0.125rem;
+    --spacing-sm: 0.375rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.25rem;
+    --spacing-2xl: 2rem;
+  }
+  
   .container {
     padding: 0 var(--spacing-md);
   }
   
+  .header-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+  
+  .brand {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .header-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
   .status-overview {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
   
   .sensor-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
   
   .info-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
   
   .control-actions {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
   
   .charts-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
   
   .notification {
     right: var(--spacing-md);
     left: var(--spacing-md);
     max-width: none;
+    top: var(--spacing-md);
   }
   
   .modal-content {
     width: 95%;
+    margin: var(--spacing-md);
+  }
+  
+  /* Enhanced mobile card styles */
+  .status-card,
+  .sensor-card,
+  .info-card {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .sensor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+  
+  .sensor-header > div:first-child {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .sensor-trend {
+    align-self: flex-end;
   }
 }
 
 @media (max-width: 480px) {
+  .main-content {
+    padding: var(--spacing-md) 0;
+  }
+  
   .brand-text h1 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+  }
+  
+  .brand-icon {
+    font-size: 2rem;
   }
   
   .sensor-value {
-    font-size: 2rem;
+    font-size: 2.25rem;
   }
   
   .control-panel {
     padding: var(--spacing-lg);
+    border-radius: var(--radius-2xl);
   }
   
   .status-card,
   .sensor-card,
   .info-card {
     padding: var(--spacing-lg);
+    border-radius: var(--radius-xl);
   }
   
   .tab-btn {
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: 0.75rem;
+    min-width: 100px;
+  }
+  
+  /* Mobile-specific enhancements */
+  .sensor-chart {
+    margin: var(--spacing-md) 0;
+  }
+  
+  .progress-ring-svg {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .water-tank .tank-container {
+    width: 50px;
+    height: 100px;
+  }
+  
+  .control-actions {
+    gap: var(--spacing-sm);
+  }
+  
+  .control-btn {
+    padding: var(--spacing-md);
+    font-size: 0.875rem;
+  }
+  
+  /* Touch-friendly improvements */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .tab-btn {
+    min-height: 48px;
+  }
+  
+  .modal-close {
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 
