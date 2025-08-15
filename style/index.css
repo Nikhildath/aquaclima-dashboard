@@ -1072,26 +1072,24 @@ body {
 }
 
 .info-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: white;
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
 }
 
 [data-theme="dark"] .info-card {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--gray-100);
+  border-color: var(--gray-200);
 }
 
 .info-card:hover {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  transform: translateY(-8px) scale(1.02);
-  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
 }
 
 .info-header {
@@ -1302,24 +1300,26 @@ body {
 
 /* Control Panel */
 .control-panel {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--gray-200);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
   overflow: hidden;
   transition: all var(--transition-normal);
 }
 
 [data-theme="dark"] .control-panel {
-  background: var(--gray-100);
-  border-color: var(--gray-200);
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .control-panel:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-2px);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .control-header {
