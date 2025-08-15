@@ -1300,26 +1300,24 @@ body {
 
 /* Control Panel */
 .control-panel {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: white;
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
   position: relative;
   overflow: hidden;
   transition: all var(--transition-normal);
 }
 
 [data-theme="dark"] .control-panel {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--gray-100);
+  border-color: var(--gray-200);
 }
 
 .control-panel:hover {
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
-  transform: translateY(-4px) scale(1.01);
-  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
 }
 
 .control-header {
@@ -1852,17 +1850,196 @@ body {
   
   .control-panel {
     padding: var(--spacing-lg);
+/* Cool Animation Effects */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-effect {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes bounce-in {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.3) translateY(50px); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.05) translateY(-10px); 
+  }
+  70% { 
+    transform: scale(0.9) translateY(0px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) translateY(0px); 
+  }
+}
+
+.bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+/* Enhanced Water Flow Animation */
+@keyframes advancedFlow {
+  0% { 
+    left: -15px; 
+    opacity: 0; 
+    transform: scale(0.5); 
+  }
+  10% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(1.2); 
+  }
+  90% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  100% { 
+    left: calc(100% + 15px); 
+    opacity: 0; 
+    transform: scale(0.5); 
+  }
+}
+
+.flow-particles::before,
+.flow-particles::after {
+  animation: advancedFlow 3s infinite linear;
+}
+
+/* Glowing Effects */
+.glow-effect {
+  position: relative;
+}
+
+.glow-effect::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--gradient-neon);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.glow-effect:hover::before {
+  opacity: 0.7;
+  animation: pulse 2s infinite;
+}
+
+/* Enhanced Pump Animation */
+@keyframes pumpAdvanced {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg); 
+    filter: drop-shadow(0 0 5px var(--primary-color));
+  }
+  25% { 
+    transform: scale(1.1) rotate(90deg); 
+    filter: drop-shadow(0 0 15px var(--success-color));
+  }
+  50% { 
+    transform: scale(1.2) rotate(180deg); 
+    filter: drop-shadow(0 0 20px var(--info-color));
+  }
+  75% { 
+    transform: scale(1.1) rotate(270deg); 
   }
   
-  .status-card,
-  .sensor-card,
-  .info-card {
-    padding: var(--spacing-lg);
+  .sensor-header h3 {
+    font-size: 1rem;
+  }
+  
+  .info-header h3 {
+    font-size: 1rem;
   }
   
   .tab-btn {
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: 0.75rem;
+  }
+  
+  .control-actions {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  
+  .control-btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 0.875rem;
+  }
+  
+  .header-actions {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+  
+  .btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.75rem;
+  }
+  
+  .connection-status {
+    font-size: 0.75rem;
+  }
+}
+
+/* Ultra small screens */
+@media (max-width: 360px) {
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .status-overview,
+  .sensor-grid,
+  .info-grid {
+    gap: var(--spacing-sm);
+  }
+  
+  .status-card,
+  .sensor-card,
+  .info-card,
+  .control-panel {
+    padding: var(--spacing-sm);
+  }
+  
+  .brand-text h1 {
+    font-size: 1.25rem;
+  }
+  
+  .sensor-value {
+    font-size: 1.75rem;
+  }
+  
+  .tab-btn {
+    padding: var(--spacing-sm);
+    font-size: 0.7rem;
+    min-width: 100px;
   }
 }
 
