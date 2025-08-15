@@ -1,1140 +1,1898 @@
-const FIREBASE_URL = "https://aquaclima-576b3-default-rtdb.firebaseio.com/"
-
-// Global state
-let currentTheme = "light"
-let alertCount = 0
-let lastAirQualityStatus = null
-let alertDismissedForStatus = null
-const sensorHistory = []
-
-// Loading screen with smooth animation
-window.addEventListener("load", () => {
-  const loadingScreen = document.getElementById("loading-screen")
-  if (!loadingScreen) return
-
-  // Simulate loading progress
-  setTimeout(() => {
-    loadingScreen.style.animation = "pop-dissolve 0.7s forwards"
-    setTimeout(() => {
-      loadingScreen.style.display = "none"
-    }, 700)
-  }, 2000)
-})
-
-// Theme toggle functionality
-function initThemeToggle() {
-  const themeToggle = document.getElementById("theme-toggle")
-  const savedTheme = localStorage.getItem("theme") || "light"
-
-  setTheme(savedTheme)
-
-  themeToggle.addEventListener("click", () => {
-    currentTheme = currentTheme === "light" ? "dark" : "light"
-    setTheme(currentTheme)
-    localStorage.setItem("theme", currentTheme)
-  })
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-function setTheme(theme) {
-  currentTheme = theme
-  document.documentElement.setAttribute("data-theme", theme)
+:root {
+  /* Colors */
+  --primary-color: #3b82f6;
+  --primary-light: #60a5fa;
+  --primary-dark: #1d4ed8;
+  --secondary-color: #64748b;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --info-color: #06b6d4;
+  
+  /* Neutrals */
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  --gradient-success: linear-gradient(135deg, var(--success-color), #34d399);
+  --gradient-warning: linear-gradient(135deg, var(--warning-color), #fbbf24);
+  --gradient-danger: linear-gradient(135deg, var(--danger-color), #f87171);
+  --gradient-info: linear-gradient(135deg, var(--info-color), #22d3ee);
+  --gradient-cool: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-neon: linear-gradient(135deg, #00f5ff 0%, #ff00ff 100%);
+  --gradient-aurora: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
+  --shadow-neon: 0 0 30px rgba(0, 245, 255, 0.3);
+  --shadow-cool: 0 25px 50px -12px rgba(102, 126, 234, 0.25);
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
 
-  const themeToggle = document.getElementById("theme-toggle")
-  const icon = themeToggle.querySelector("i")
+/* Dark theme variables */
+[data-theme="dark"] {
+  --gray-50: #0f172a;
+  --gray-100: #1e293b;
+  --gray-200: #334155;
+  --gray-300: #475569;
+  --gray-400: #64748b;
+  --gray-500: #94a3b8;
+  --gray-600: #cbd5e1;
+  --gray-700: #e2e8f0;
+  --gray-800: #f1f5f9;
+  --gray-900: #f8fafc;
+}
 
-  if (theme === "dark") {
-    icon.className = "fas fa-sun"
-  } else {
-    icon.className = "fas fa-moon"
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-900);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+  overflow-x: hidden;
+}
+
+/* Animated Background */
+.animated-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.floating-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.floating-particles::before,
+.floating-particles::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0, 245, 255, 0.15) 0%, rgba(255, 0, 255, 0.1) 50%, transparent 70%);
+  border-radius: 50%;
+  animation: float 25s infinite linear;
+  filter: blur(1px);
+}
+
+.floating-particles::before {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.floating-particles::after {
+  top: 60%;
+  right: 10%;
+  animation-delay: -10s;
+}
+
+/* Additional floating elements */
+.floating-particles::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  top: 30%;
+  left: 70%;
+  animation: float 30s infinite linear reverse;
+  animation-delay: -15s;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); }
+  25% { transform: translateY(-40px) translateX(20px) rotate(90deg) scale(1.1); }
+  50% { transform: translateY(0px) translateX(40px) rotate(180deg) scale(0.9); }
+  75% { transform: translateY(40px) translateX(20px) rotate(270deg) scale(1.1); }
+}
+
+/* Loading Screen */
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+}
+
+.loading-container {
+  text-align: center;
+  max-width: 400px;
+  padding: var(--spacing-xl);
+}
+
+.loading-logo {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.loading-logo i {
+  animation: pulse 2s infinite;
+}
+
+.loading-subtitle {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  margin-bottom: var(--spacing-xl);
+  font-weight: 500;
+}
+
+.loading-progress {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-lg);
+}
+
+.progress-bar {
+  height: 100%;
+  background: white;
+  border-radius: 3px;
+  animation: loading-progress 2s ease-in-out infinite;
+}
+
+.loading-status {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+@keyframes loading-progress {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+@keyframes pop-dissolve {
+  0% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(0.95); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Header */
+.header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .header {
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom-color: var(--gray-200);
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.brand-icon {
+  font-size: 2.5rem;
+  background: var(--gradient-success);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: pulse 3s infinite;
+}
+
+.brand-text h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  letter-spacing: 0.05em;
+}
+
+.brand-text p {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin-top: -0.25rem;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-400);
+  position: relative;
+}
+
+.status-dot.online {
+  background: var(--success-color);
+}
+
+.status-dot.online::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: var(--success-color);
+  opacity: 0.3;
+  animation: pulse 2s infinite;
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 80px;
+  z-index: 90;
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .nav-tabs {
+  background: var(--gray-100);
+  border-bottom-color: var(--gray-200);
+}
+
+.tab-list {
+  display: flex;
+  gap: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  position: relative;
+}
+
+.tab-btn:hover {
+  color: var(--primary-color);
+  background: var(--gray-50);
+}
+
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  background: var(--gray-50);
+}
+
+.alert-badge {
+  background: var(--danger-color);
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.btn-secondary:hover {
+  background: var(--gray-200);
+  border-color: var(--gray-400);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: var(--gradient-success);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-danger {
+  background: var(--gradient-danger);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.btn-sm {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.75rem;
+}
+
+/* Button Ripple Effect */
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
   }
 }
 
-// Tab functionality
-function initTabs() {
-  const tabBtns = document.querySelectorAll(".tab-btn")
-  const tabContents = document.querySelectorAll(".tab-content")
-
-  tabBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const targetTab = btn.dataset.tab
-
-      // Remove active class from all tabs and contents
-      tabBtns.forEach((b) => b.classList.remove("active"))
-      tabContents.forEach((c) => c.classList.remove("active"))
-
-      // Add active class to clicked tab and corresponding content
-      btn.classList.add("active")
-      document.getElementById(`${targetTab}-tab`).classList.add("active")
-    })
-  })
+/* Main Content */
+.main-content {
+  padding: var(--spacing-xl) 0;
+  min-height: calc(100vh - 160px);
 }
 
-// Update UI with sensor data
-function updateUI(data) {
-  // Store data for history
-  const timestamp = new Date().toISOString()
-  sensorHistory.push({
-    timestamp,
-    ...data,
-  })
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+}
 
-  // Keep only last 100 entries
-  if (sensorHistory.length > 100) {
-    sensorHistory.shift()
+/* Card Glow Effect */
+.card-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: var(--gradient-primary);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity var(--transition-normal);
+}
+
+.status-card:hover .card-glow,
+.sensor-card:hover .card-glow,
+.info-card:hover .card-glow,
+.control-panel:hover .card-glow {
+  opacity: 0.05;
+}
+
+/* Status Overview */
+.status-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.status-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .status-card {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+.status-card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+.status-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gray-300);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.status-indicator.active {
+  background: var(--success-color);
+}
+
+.status-indicator.active::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: var(--success-color);
+  opacity: 0.3;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.warning {
+  background: var(--warning-color);
+}
+
+.status-indicator.danger {
+  background: var(--danger-color);
+}
+
+.status-info {
+  flex: 1;
+}
+
+.status-info h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 0.25rem;
+}
+
+.status-info p {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin-bottom: 0.25rem;
+}
+
+.uptime, .pump-runtime, .battery-time, .data-usage {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+/* Battery Status */
+.battery-icon {
+  width: 48px;
+  height: 28px;
+  border: 3px solid var(--gray-400);
+  border-radius: 6px;
+  position: relative;
+  background: var(--gray-100);
+  flex-shrink: 0;
+}
+
+.battery-icon::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 6px;
+  width: 3px;
+  height: 10px;
+  background: var(--gray-400);
+  border-radius: 0 2px 2px 0;
+}
+
+.battery-level {
+  height: 100%;
+  background: var(--gradient-success);
+  border-radius: 3px;
+  transition: all var(--transition-normal);
+  min-width: 3px;
+  position: relative;
+}
+
+.battery-bolt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.battery-level:hover + .battery-bolt {
+  opacity: 1;
+}
+
+/* Pump Animation */
+.pump-animation {
+  font-size: 2rem;
+  color: var(--primary-color);
+  opacity: 0.3;
+  transition: all var(--transition-normal);
+}
+
+.pump-animation.active {
+  opacity: 1;
+  animation: pump-pulse 1s infinite;
+}
+
+@keyframes pump-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Network Status */
+.network-icon {
+  font-size: 2rem;
+  color: var(--success-color);
+  flex-shrink: 0;
+}
+
+/* Sensor Grid */
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.sensor-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .sensor-card {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+.sensor-card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+.sensor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.sensor-header > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.sensor-icon {
+  font-size: 1.5rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  color: var(--primary-color);
+  transition: all var(--transition-normal);
+}
+
+.sensor-card:hover .sensor-icon {
+  background: var(--primary-color);
+  color: white;
+  transform: scale(1.1);
+}
+
+.sensor-header h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.sensor-trend {
+  font-size: 1rem;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+}
+
+.trend-up { color: var(--success-color); }
+.trend-down { color: var(--danger-color); }
+.trend-stable { color: var(--warning-color); }
+
+.sensor-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sensor-status {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
+}
+
+.sensor-status.good { color: var(--success-color); }
+.sensor-status.warning { color: var(--warning-color); }
+.sensor-status.danger { color: var(--danger-color); }
+
+/* Progress Ring */
+.sensor-chart {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.progress-ring {
+  position: relative;
+}
+
+.progress-ring-svg {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+  fill: none;
+  stroke: var(--gray-200);
+  stroke-width: 6;
+}
+
+.progress-ring-fill {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  transition: stroke-dashoffset var(--transition-slow);
+}
+
+.moisture-fill { stroke: var(--success-color); }
+.humidity-fill { stroke: var(--info-color); }
+
+.progress-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  color: var(--gray-400);
+}
+
+/* Mini Charts */
+.sensor-mini-chart {
+  height: 40px;
+  margin-top: var(--spacing-md);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--gray-50);
+}
+
+/* Water Tank Visualization */
+.water-tank {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-md);
+}
+
+.tank-container {
+  width: 60px;
+  height: 120px;
+  border: 3px solid var(--gray-300);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  position: relative;
+  background: var(--gray-50);
+  overflow: hidden;
+}
+
+.water-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--gradient-info);
+  transition: height var(--transition-slow);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.tank-levels {
+  position: absolute;
+  top: 0;
+  right: -10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.level-mark {
+  width: 8px;
+  height: 2px;
+  background: var(--gray-400);
+}
+
+.level-mark.high { background: var(--success-color); }
+.level-mark.medium { background: var(--warning-color); }
+.level-mark.low { background: var(--danger-color); }
+
+/* pH Scale */
+.ph-scale {
+  margin-top: var(--spacing-md);
+  position: relative;
+}
+
+.ph-scale::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to right, #ef4444, #f59e0b, #10b981, #f59e0b, #ef4444);
+  border-radius: 4px;
+  transform: translateY(-50%);
+}
+
+.ph-indicator {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 3px solid var(--primary-color);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: left var(--transition-normal);
+  z-index: 1;
+}
+
+.ph-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-md);
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 600;
+}
+
+/* Temperature Gauge */
+.temperature-gauge {
+  margin-top: var(--spacing-md);
+}
+
+.gauge-container {
+  width: 100%;
+  height: 12px;
+  background: var(--gray-200);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.gauge-fill {
+  height: 100%;
+  background: var(--gradient-warning);
+  border-radius: 6px;
+  transition: width var(--transition-normal);
+}
+
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 600;
+}
+
+/* AQI Bar */
+.aqi-bar {
+  margin-top: var(--spacing-md);
+  position: relative;
+}
+
+.aqi-bar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to right, var(--success-color), var(--warning-color), var(--danger-color));
+  border-radius: 4px;
+  transform: translateY(-50%);
+}
+
+.aqi-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 12px;
+  background: var(--primary-color);
+  border-radius: 6px;
+  transform: translateY(-50%);
+  transition: width var(--transition-normal);
+}
+
+.aqi-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-md);
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 600;
+}
+
+/* Flow Animation */
+.flow-animation {
+  height: 40px;
+  margin-top: var(--spacing-md);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--gray-50);
+}
+
+.flow-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.flow-particles::before,
+.flow-particles::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: flow 2s infinite linear;
+}
+
+.flow-particles::before {
+  animation-delay: 0s;
+}
+
+.flow-particles::after {
+  animation-delay: 1s;
+}
+
+@keyframes flow {
+  0% { left: -10px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.info-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .info-card {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+.info-card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+.info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.info-header > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.info-icon {
+  font-size: 1.5rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  color: var(--primary-color);
+  transition: all var(--transition-normal);
+}
+
+.info-card:hover .info-icon {
+  background: var(--primary-color);
+  color: white;
+  transform: scale(1.1);
+}
+
+.info-header h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.expand-btn:hover {
+  color: var(--primary-color);
+  background: var(--gray-50);
+}
+
+/* Weather Content */
+.weather-main {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-sm);
+}
+
+.weather-details {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin-bottom: var(--spacing-md);
+}
+
+.weather-forecast {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+}
+
+.forecast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.75rem;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.forecast-item i {
+  font-size: 1.25rem;
+  color: var(--warning-color);
+}
+
+/* AI Content */
+.ai-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.ai-thinking {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.thinking-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  animation: thinking 1.4s infinite ease-in-out;
+}
+
+.thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+.thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes thinking {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+.ai-recommendation {
+  font-size: 1rem;
+  color: var(--gray-700);
+  line-height: 1.6;
+  padding: var(--spacing-lg);
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--primary-color);
+  margin-bottom: var(--spacing-md);
+}
+
+.ai-confidence {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.confidence-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confidence-fill {
+  height: 100%;
+  background: var(--gradient-success);
+  border-radius: 3px;
+  transition: width var(--transition-normal);
+}
+
+/* Stats Content */
+.stats-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.stat-item:hover {
+  background: var(--gray-100);
+  transform: translateX(4px);
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-color);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 1.25rem;
+}
+
+.stat-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+/* Control Panel */
+.control-panel {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .control-panel {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+.control-panel:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+.control-header {
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.control-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-sm);
+}
+
+.control-header p {
+  color: var(--gray-500);
+  font-size: 1rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.control-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.mode-indicator {
+  color: var(--success-color);
+}
+
+.control-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.control-btn {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.control-btn:active .btn-ripple {
+  animation: ripple 0.6s linear;
+}
+
+/* Schedule Section */
+.control-schedule {
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.control-schedule h4 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-md);
+}
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: white;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.schedule-item input {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+/* Analytics Tab */
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.analytics-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--gray-900);
+}
+
+.time-range {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.time-range .btn.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.chart-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+}
+
+[data-theme="dark"] .chart-card {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+.chart-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Alerts Tab */
+.alerts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.alerts-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--gray-900);
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.alert-item {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  border-left: 4px solid var(--warning-color);
+}
+
+[data-theme="dark"] .alert-item {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+.alert-item.danger {
+  border-left-color: var(--danger-color);
+}
+
+.alert-item.success {
+  border-left-color: var(--success-color);
+}
+
+/* History Tab */
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.history-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--gray-900);
+}
+
+.history-table {
+  background: white;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+}
+
+[data-theme="dark"] .history-table {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+.history-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.history-table th {
+  background: var(--gray-50);
+  font-weight: 700;
+  color: var(--gray-900);
+  font-size: 0.875rem;
+}
+
+.history-table td {
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: modalSlideIn 0.3s ease;
+}
+
+[data-theme="dark"] .modal-content {
+  background: var(--gray-100);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
   }
-
-  // Soil Moisture
-  const soilMoisture = data.soil || 0
-  document.getElementById("soilMoisture").textContent = `${soilMoisture}%`
-  updateProgressRing("soil-progress", soilMoisture, 100)
-  updateTrend("moisture-trend", soilMoisture, 50)
-
-  // Air Humidity
-  const humidity = data.humidity || 0
-  document.getElementById("airHumidity").textContent = `${humidity}%`
-  updateProgressRing("humidity-progress", humidity, 100)
-  updateTrend("humidity-trend", humidity, 60)
-
-  // Water Level
-  const waterLevel = data.water_level || 0
-  const waterStatus = getStatusInfo(waterLevel, [20, 40, 60], ["Low", "Average", "Good", "High"])
-  document.getElementById("waterLevel").textContent = `${waterLevel}%`
-  document.getElementById("water-status").textContent = waterStatus.text
-  document.getElementById("water-status").className = `sensor-status ${waterStatus.class}`
-  updateWaterTank(waterLevel)
-  updateTrend("water-trend", waterLevel, 50)
-
-  // pH Level
-  const ph = data.ph || 0
-  const phStatus = getStatusInfo(ph, [5.5, 6.5, 7.5], ["Acidic", "Good", "Average", "Alkaline"])
-  document.getElementById("phValue").textContent = ph.toFixed(1)
-  document.getElementById("ph-status").textContent = phStatus.text
-  document.getElementById("ph-status").className = `sensor-status ${phStatus.class}`
-  updatePHIndicator(ph)
-  updateTrend("ph-trend", ph, 7)
-
-  // Air Temperature
-  const airTemp = data.air_temp || 0
-  document.getElementById("airData").textContent = `${airTemp}°C`
-  updateTemperatureGauge(airTemp)
-  updateTrend("temp-trend", airTemp, 25)
-
-  // Water Temperature
-  const waterTemp = data.water_temp || 0
-  const waterTempStatus = getStatusInfo(waterTemp, [10, 20, 30], ["Cold", "Good", "Warm", "Hot"])
-  document.getElementById("waterTemp").textContent = `${waterTemp}°C`
-  document.getElementById("water-temp-status").textContent = waterTempStatus.text
-  document.getElementById("water-temp-status").className = `sensor-status ${waterTempStatus.class}`
-  updateTrend("water-temp-trend", waterTemp, 22)
-
-  // Air Quality
-  const airQuality = data.air_quality || 0
-  const airQualityStatus = getStatusInfo(airQuality, [50, 100, 150], ["Good", "Average", "Bad", "Hazardous"])
-
-  document.getElementById("airQuality").textContent = `${airQuality} AQI`
-  document.getElementById("air-quality-status").textContent = airQualityStatus.text
-  document.getElementById("air-quality-status").className = `sensor-status ${airQualityStatus.class}`
-  updateAQIBar(airQuality)
-  updateTrend("air-quality-trend", airQuality, 75)
-
-  // Only trigger if status changed AND not dismissed for same
-  if (
-    (airQualityStatus.text === "Bad" || airQualityStatus.text === "Hazardous") &&
-    airQualityStatus.text !== lastAirQualityStatus
-  ) {
-    showAirQualityAlert(`Air Quality is ${airQualityStatus.text}! (${airQuality} AQI)`, airQualityStatus.text)
-    addAlert("warning", "Air Quality Alert", `Air quality is ${airQualityStatus.text} (${airQuality} AQI)`)
-  }
-
-  lastAirQualityStatus = airQualityStatus.text
-
-  // Water Flow
-  const flow = data.flow || 0
-  const flowStatus = getStatusInfo(flow, [1, 3, 5], ["Low", "Average", "Good", "High"])
-  document.getElementById("flowRate").textContent = `${flow} L/min`
-  document.getElementById("flow-status").textContent = flowStatus.text
-  document.getElementById("flow-status").className = `sensor-status ${flowStatus.class}`
-  updateTrend("flow-trend", flow, 3)
-
-  // Update current flow rate for water usage calculations
-  currentFlowRate = flow || 2.5 // Use Firebase flow rate or default to 2.5 L/min
-  // Battery Percentage - fix the path
-  const battery = data.battery || 0 // This was correct, but make sure it's being read properly
-  document.getElementById("battery-text").textContent = `${battery}%`
-  updateBatteryLevel(battery)
-  updateBatteryTime(battery)
-
-  // Update stats
-  updateStats()
-
-  // Update mini charts
-  updateMiniCharts()
-
-  // Update AI confidence
-  updateAIConfidence()
-}
-
-// Helper function to get status info with CSS classes
-function getStatusInfo(value, thresholds, labels) {
-  const classes = ["danger", "good", "warning", "danger"]
-  for (let i = 0; i < thresholds.length; i++) {
-    if (value < thresholds[i]) {
-      return { text: labels[i], class: classes[i] }
-    }
-  }
-  return { text: labels[labels.length - 1], class: classes[classes.length - 1] }
-}
-
-// Update trend indicators
-function updateTrend(elementId, currentValue, previousValue) {
-  const element = document.getElementById(elementId)
-  if (!element) return
-
-  const icon = element.querySelector("i")
-  if (currentValue > previousValue) {
-    icon.className = "fas fa-arrow-up trend-up"
-  } else if (currentValue < previousValue) {
-    icon.className = "fas fa-arrow-down trend-down"
-  } else {
-    icon.className = "fas fa-minus trend-stable"
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-// Update progress ring
-function updateProgressRing(elementId, value, max) {
-  const element = document.getElementById(elementId)
-  if (!element) return
-
-  const percentage = Math.min(100, Math.max(0, (value / max) * 100))
-  const circumference = 220 // 2 * π * 35
-  const offset = circumference - (percentage / 100) * circumference
-
-  element.style.strokeDashoffset = offset
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--gray-200);
 }
 
-// Update water tank visualization
-function updateWaterTank(percentage) {
-  const waterFill = document.getElementById("water-fill")
-  if (waterFill) {
-    waterFill.style.height = `${Math.max(2, percentage)}%`
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.modal-body {
+  padding: var(--spacing-xl);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  border-top: 1px solid var(--gray-200);
+}
+
+/* Settings */
+.setting-group {
+  margin-bottom: var(--spacing-xl);
+}
+
+.setting-group h4 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-md);
+}
+
+.setting-item {
+  margin-bottom: var(--spacing-md);
+}
+
+.setting-item label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+
+.setting-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color);
+}
+
+.setting-item input[type="number"] {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  width: 100px;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  position: relative;
+}
+
+#theme-toggle {
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  color: var(--gray-700);
+  transition: all var(--transition-normal);
+}
+
+#theme-toggle:hover {
+  background: var(--gray-200);
+  transform: rotate(180deg);
+}
+
+[data-theme="dark"] #theme-toggle {
+  background: var(--gray-200);
+  border-color: var(--gray-300);
+  color: var(--gray-800);
+}
+
+/* Notifications */
+.notification {
+  position: fixed;
+  top: var(--spacing-xl);
+  right: var(--spacing-xl);
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--gray-200);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  max-width: 400px;
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform var(--transition-normal);
+}
+
+[data-theme="dark"] .notification {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+.notification[style*="display: flex"] {
+  transform: translateX(0);
+}
+
+.notification-warning {
+  border-left: 4px solid var(--warning-color);
+}
+
+.notification-info {
+  border-left: 4px solid var(--info-color);
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  color: var(--primary-color);
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.notification-message {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  line-height: 1.4;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 0.25rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.notification-close:hover {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .header-container {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .tab-list {
+    overflow-x: auto;
+    padding-bottom: var(--spacing-sm);
+  }
+  
+  .tab-btn {
+    white-space: nowrap;
   }
 }
 
-// Update pH indicator
-function updatePHIndicator(phValue) {
-  const indicator = document.getElementById("ph-indicator")
-  if (indicator) {
-    const percentage = Math.min(100, Math.max(0, (phValue / 14) * 100))
-    indicator.style.left = `${percentage}%`
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+  
+  .status-overview {
+    grid-template-columns: 1fr;
+  }
+  
+  .sensor-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .control-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .notification {
+    right: var(--spacing-md);
+    left: var(--spacing-md);
+    max-width: none;
+  }
+  
+  .modal-content {
+    width: 95%;
   }
 }
 
-// Update temperature gauge
-function updateTemperatureGauge(temperature) {
-  const gauge = document.getElementById("temp-gauge")
-  if (gauge) {
-    const percentage = Math.min(100, Math.max(0, (temperature / 50) * 100))
-    gauge.style.width = `${percentage}%`
+@media (max-width: 480px) {
+  .brand-text h1 {
+    font-size: 1.5rem;
+  }
+  
+  .sensor-value {
+    font-size: 2rem;
+  }
+  
+  .control-panel {
+    padding: var(--spacing-lg);
+  }
+  
+  .status-card,
+  .sensor-card,
+  .info-card {
+    padding: var(--spacing-lg);
+  }
+  
+  .tab-btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 0.75rem;
   }
 }
 
-// Update AQI bar
-function updateAQIBar(aqi) {
-  const fill = document.getElementById("aqi-fill")
-  if (fill) {
-    const percentage = Math.min(100, Math.max(0, (aqi / 200) * 100))
-    fill.style.width = `${percentage}%`
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-// Update battery level visual
-function updateBatteryLevel(percentage) {
-  const batteryLevel = document.getElementById("battery-level")
-  const batteryIndicator = document.querySelector(".battery-status .status-indicator")
-
-  if (batteryLevel) {
-    batteryLevel.style.width = `${Math.max(5, percentage)}%`
-
-    // Change color based on battery level
-    if (percentage > 50) {
-      batteryLevel.style.background = "var(--gradient-success)"
-      if (batteryIndicator) {
-        batteryIndicator.className = "status-indicator active"
-      }
-    } else if (percentage > 20) {
-      batteryLevel.style.background = "var(--gradient-warning)"
-      if (batteryIndicator) {
-        batteryIndicator.className = "status-indicator warning"
-      }
-    } else {
-      batteryLevel.style.background = "var(--gradient-danger)"
-      if (batteryIndicator) {
-        batteryIndicator.className = "status-indicator danger"
-      }
-    }
+/* Print Styles */
+@media print {
+  .header,
+  .nav-tabs,
+  .control-panel,
+  .notification {
+    display: none !important;
+  }
+  
+  .main-content {
+    padding: 0;
+  }
+  
+  .sensor-card,
+  .status-card,
+  .info-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid var(--gray-300);
   }
 }
-
-// Update battery time estimate
-function updateBatteryTime(percentage) {
-  const batteryTime = document.getElementById("battery-time")
-  if (batteryTime) {
-    const hours = Math.floor((percentage / 100) * 24)
-    const minutes = Math.floor(((percentage / 100) * 24 - hours) * 60)
-    batteryTime.textContent = `${hours}h ${minutes}m`
-  }
-}
-
-// Update stats
-function updateStats() {
-  // Water used calculation (simplified)
-  const waterUsed = document.getElementById("water-used")
-  if (waterUsed) {
-    // Water usage is now calculated in updatePumpStatus based on actual flow rate
-    waterUsed.textContent = `${totalWaterUsed.toFixed(1)} L`
-  }
-
-  // Pump runtime
-  const totalRuntime = document.getElementById("total-runtime")
-  if (totalRuntime && pumpStartTime) {
-    const runtime = Date.now() - pumpStartTime
-    const hours = Math.floor(runtime / (1000 * 60 * 60))
-    const minutes = Math.floor((runtime % (1000 * 60 * 60)) / (1000 * 60))
-    totalRuntime.textContent = `${hours}h ${minutes}m`
-  }
-
-  // Efficiency (simulated)
-  const efficiency = document.getElementById("efficiency")
-  if (efficiency) {
-    const eff = 90 + Math.random() * 10
-    efficiency.textContent = `${eff.toFixed(1)}%`
-  }
-}
-
-// Update mini charts
-function updateMiniCharts() {
-  // This would integrate with the charts.js file
-  // For now, we'll just update the canvas elements
-  const moistureChart = document.getElementById("moisture-mini-chart")
-  const humidityChart = document.getElementById("humidity-mini-chart")
-
-  if (moistureChart && humidityChart) {
-    // Charts will be handled by charts.js
-  }
-}
-
-// Update AI confidence - make it functional
-function updateAIConfidence() {
-  const confidenceFill = document.getElementById("ai-confidence")
-  const confidencePercent = document.getElementById("confidence-percent")
-
-  if (confidenceFill && confidencePercent) {
-    // Base confidence on sensor data quality and system status
-    let confidence = 70 // Base confidence
-
-    // Get current sensor data to calculate confidence
-    const soilMoisture = Number.parseFloat(document.getElementById("soilMoisture").textContent) || 0
-    const humidity = Number.parseFloat(document.getElementById("airHumidity").textContent) || 0
-    const waterLevel = Number.parseFloat(document.getElementById("waterLevel").textContent) || 0
-
-    // Increase confidence based on sensor readings being in good ranges
-    if (soilMoisture > 30 && soilMoisture < 80) confidence += 10
-    if (humidity > 40 && humidity < 80) confidence += 10
-    if (waterLevel > 20) confidence += 10
-
-    // Cap at 100%
-    confidence = Math.min(100, confidence)
-
-    confidenceFill.style.width = `${confidence}%`
-    confidencePercent.textContent = `${confidence}%`
-  }
-}
-
-// Fetch sensor data from Firebase
-async function fetchSensorData() {
-  try {
-    const res = await fetch(`${FIREBASE_URL}.json`)
-    const data = await res.json()
-    if (data) {
-      updateUI(data)
-      updateConnectionStatus(true)
-    }
-  } catch (error) {
-    console.error("Failed to fetch sensor data:", error)
-    updateConnectionStatus(false)
-  }
-}
-
-// Update connection status
-function updateConnectionStatus(isOnline) {
-  const statusDot = document.getElementById("connection-status")
-  const statusText = statusDot.nextElementSibling
-
-  if (isOnline) {
-    statusDot.className = "status-dot online"
-    statusText.textContent = "Online"
-  } else {
-    statusDot.className = "status-dot"
-    statusText.textContent = "Offline"
-  }
-}
-
-// Fetch AI recommendation
-async function fetchAIRecommendation() {
-  try {
-    const res = await fetch(`${FIREBASE_URL}/ai/recommendation.json`)
-    let data = await res.json()
-    if (typeof data === "string" && data.startsWith('"') && data.endsWith('"')) {
-      data = data.slice(1, -1)
-    }
-    document.getElementById("aiRecommendation").textContent = data || "No recommendations available"
-
-    // Hide thinking animation
-    const thinking = document.getElementById("ai-thinking")
-    if (thinking) {
-      thinking.style.display = "none"
-    }
-  } catch (error) {
-    console.error("Failed to fetch AI recommendation:", error)
-    document.getElementById("aiRecommendation").textContent = "Unable to load recommendations"
-  }
-}
-
-// Manual override: Start/Stop Pump
-async function togglePumpWithManualOverride(state) {
-  try {
-    await fetch(`${FIREBASE_URL}/controls.json`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pump: state, manual_override: true }),
-    })
-
-    showPumpNotification(state)
-    updatePumpStatus(state)
-    updateControlMode("Manual")
-
-    if (state) {
-      pumpStartTime = Date.now()
-    } else {
-      pumpStartTime = null
-    }
-
-    // Add alert
-    addAlert("info", "Pump Control", `Pump ${state ? "started" : "stopped"} manually`)
-  } catch (error) {
-    console.error("Failed to update pump state:", error)
-  }
-}
-
-// Return to Auto Mode
-async function resetAutoMode() {
-  try {
-    await fetch(`${FIREBASE_URL}/controls.json`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ manual_override: false }),
-    })
-
-    showPumpNotification("auto")
-    updateControlMode("Automatic")
-    addAlert("success", "Auto Mode", "System returned to automatic mode")
-  } catch (error) {
-    console.error("Failed to reset to auto mode:", error)
-  }
-}
-
-// Update control mode display
-function updateControlMode(mode) {
-  const modeIndicator = document.getElementById("control-mode")
-  if (modeIndicator) {
-    modeIndicator.textContent = mode
-  }
-}
-
-// Show pump notification
-function showPumpNotification(state) {
-  const notification = document.getElementById("pump-popup")
-  const sound = document.getElementById("pump-sound")
-
-  if (notification) {
-    const messageElement = notification.querySelector(".notification-message")
-    const iconElement = notification.querySelector(".notification-icon i")
-
-    if (state === "auto") {
-      messageElement.textContent = "System returned to automatic mode"
-      iconElement.className = "fas fa-magic"
-    } else {
-      messageElement.textContent = state ? "Pump has been started manually" : "Pump has been stopped manually"
-      iconElement.className = state ? "fas fa-play" : "fas fa-stop"
-    }
-
-    notification.style.display = "flex"
-
-    if (sound) {
-      sound.currentTime = 0
-      sound.play().catch(() => {}) // Ignore audio errors
-    }
-
-    setTimeout(() => {
-      notification.style.display = "none"
-    }, 4000)
-  }
-}
-
-// Global variables for pump tracking
-let pumpStartTime = null
-let totalPumpRuntime = 0 // in milliseconds
-let totalWaterUsed = 0
-let lastPumpState = false
-let currentFlowRate = 2.5 // Default flow rate, will be updated from Firebase
-
-// Update pump status and calculate runtime/water usage
-function updatePumpStatus(isOn) {
-  const statusText = document.getElementById("pump-status-text")
-  const indicator = document.getElementById("pump-indicator")
-  const animation = document.getElementById("pump-animation")
-  const runtime = document.getElementById("pump-runtime")
-
-  // Track pump state changes
-  if (isOn && !lastPumpState) {
-    // Pump just turned on
-    pumpStartTime = Date.now()
-  } else if (!isOn && lastPumpState) {
-    // Pump just turned off
-    if (pumpStartTime) {
-      const sessionRuntime = Date.now() - pumpStartTime
-      totalPumpRuntime += sessionRuntime
-
-      // Calculate water used using actual flow rate from Firebase
-      const minutesRun = sessionRuntime / (1000 * 60)
-      const waterUsedThisSession = minutesRun * currentFlowRate
-      totalWaterUsed += waterUsedThisSession
-
-      pumpStartTime = null
-    }
-  }
-
-  lastPumpState = isOn
-
-  if (statusText && indicator) {
-    statusText.textContent = isOn ? "Running" : "Stopped"
-    indicator.className = isOn ? "status-indicator active" : "status-indicator"
-  }
-
-  if (animation) {
-    animation.className = isOn ? "pump-animation active" : "pump-animation"
-  }
-
-  // Update runtime display
-  if (runtime) {
-    let displayRuntime = totalPumpRuntime
-    if (isOn && pumpStartTime) {
-      displayRuntime += Date.now() - pumpStartTime
-    }
-
-    const hours = Math.floor(displayRuntime / (1000 * 60 * 60))
-    const minutes = Math.floor((displayRuntime % (1000 * 60 * 60)) / (1000 * 60))
-    runtime.textContent = `${hours}h ${minutes}m`
-  }
-
-  // Update total runtime in stats
-  const totalRuntimeElement = document.getElementById("total-runtime")
-  if (totalRuntimeElement) {
-    let displayRuntime = totalPumpRuntime
-    if (isOn && pumpStartTime) {
-      displayRuntime += Date.now() - pumpStartTime
-    }
-
-    const hours = Math.floor(displayRuntime / (1000 * 60 * 60))
-    const minutes = Math.floor((displayRuntime % (1000 * 60 * 60)) / (1000 * 60))
-    totalRuntimeElement.textContent = `${hours}h ${minutes}m`
-  }
-
-  // Update water used in stats
-  const waterUsedElement = document.getElementById("water-used")
-  if (waterUsedElement) {
-    let currentWaterUsed = totalWaterUsed
-    if (isOn && pumpStartTime) {
-      const currentSessionMinutes = (Date.now() - pumpStartTime) / (1000 * 60)
-      currentWaterUsed += currentSessionMinutes * currentFlowRate
-    }
-    waterUsedElement.textContent = `${currentWaterUsed.toFixed(1)} L`
-  }
-}
-
-// Fetch pump status from Firebase
-async function fetchPumpStatus() {
-  try {
-    const res = await fetch(`${FIREBASE_URL}/controls.json`)
-    const data = await res.json()
-    if (data) {
-      updatePumpStatus(data.pump)
-
-      // Update control mode based on status
-      if (data.scheduled) {
-        updateControlMode("Scheduled")
-      } else if (data.manual_override) {
-        updateControlMode("Manual")
-      } else {
-        updateControlMode("Automatic")
-      }
-    }
-  } catch (error) {
-    console.error("Failed to fetch pump status:", error)
-  }
-}
-
-// Show air quality alert
-function showAirQualityAlert(message, statusText) {
-  const notification = document.getElementById("air-quality-popup")
-  const sound = document.getElementById("aqi-alert-sound")
-
-  // Avoid showing again if dismissed for same status
-  if (alertDismissedForStatus === statusText) {
-    return
-  }
-
-  if (notification) {
-    notification.querySelector(".notification-message").textContent = message
-    notification.style.display = "flex"
-
-    if (sound) {
-      sound.currentTime = 0
-      sound.play().catch(() => {}) // Ignore audio errors
-    }
-  }
-}
-
-// Close AQI alert
-document.getElementById("aqi-confirm-btn").addEventListener("click", () => {
-  const notification = document.getElementById("air-quality-popup")
-  notification.style.display = "none"
-
-  // Remember dismissed status so it doesn't show again
-  alertDismissedForStatus = lastAirQualityStatus
-})
-
-// Add alert to alerts tab
-function addAlert(type, title, message) {
-  alertCount++
-  updateAlertBadge()
-
-  const alertsList = document.getElementById("alerts-list")
-  if (!alertsList) return
-
-  const alertItem = document.createElement("div")
-  alertItem.className = `alert-item ${type}`
-  alertItem.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-      <div>
-        <h4 style="font-weight: 700; margin-bottom: 0.5rem; color: var(--gray-900);">${title}</h4>
-        <p style="color: var(--gray-600); margin-bottom: 0.5rem;">${message}</p>
-        <small style="color: var(--gray-400);">${new Date().toLocaleString()}</small>
-      </div>
-      <button class="btn btn-sm btn-secondary" onclick="this.parentElement.parentElement.remove(); alertCount--; updateAlertBadge();">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-  `
-
-  alertsList.insertBefore(alertItem, alertsList.firstChild)
-}
-
-// Update alert badge
-function updateAlertBadge() {
-  const badge = document.getElementById("alert-count")
-  if (badge) {
-    badge.textContent = alertCount
-    badge.style.display = alertCount > 0 ? "flex" : "none"
-  }
-}
-
-// Weather functions
-function getWeatherDescription(code) {
-  const weatherMap = {
-    0: "Clear sky",
-    1: "Mainly clear",
-    2: "Partly cloudy",
-    3: "Overcast",
-    45: "Fog",
-    48: "Depositing rime fog",
-    51: "Light drizzle",
-    53: "Moderate drizzle",
-    55: "Dense drizzle",
-    61: "Slight rain",
-    63: "Moderate rain",
-    65: "Heavy rain",
-    71: "Slight snow",
-    73: "Moderate snow",
-    75: "Heavy snow",
-    80: "Rain showers",
-    81: "Moderate rain showers",
-    82: "Violent rain showers",
-    95: "Thunderstorm",
-  }
-  return weatherMap[code] || "Unknown conditions"
-}
-
-// Fetch weather data
-function fetchWeather() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        updateWeather(position.coords.latitude, position.coords.longitude)
-      },
-      () => {
-        updateWeather(40.7128, -74.006) // Default to New York
-      },
-    )
-  } else {
-    updateWeather(40.7128, -74.006)
-  }
-}
-
-function updateWeather(lat, lon) {
-  fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=3`,
-  )
-    .then((response) => response.json())
-    .then((data) => {
-      const weather = data.current_weather
-      const temp = Math.round(weather.temperature)
-      const description = getWeatherDescription(weather.weathercode)
-
-      document.getElementById("weather-summary").textContent = `${temp}°C, ${description}`
-      document.getElementById("weather-details").textContent = `Wind: ${weather.windspeed} km/h`
-
-      // Update forecast
-      const forecast = document.getElementById("weather-forecast")
-      if (forecast && data.daily) {
-        forecast.innerHTML = ""
-        for (let i = 1; i < Math.min(4, data.daily.time.length); i++) {
-          const day = new Date(data.daily.time[i]).toLocaleDateString("en", { weekday: "short" })
-          const maxTemp = Math.round(data.daily.temperature_2m_max[i])
-          const weatherCode = data.daily.weathercode[i]
-          const icon = getWeatherIcon(weatherCode)
-
-          const forecastItem = document.createElement("div")
-          forecastItem.className = "forecast-item"
-          forecastItem.innerHTML = `
-            <span>${day}</span>
-            <i class="${icon}"></i>
-            <span>${maxTemp}°C</span>
-          `
-          forecast.appendChild(forecastItem)
-        }
-      }
-    })
-    .catch((error) => {
-      console.error("Failed to fetch weather:", error)
-      document.getElementById("weather-summary").textContent = "Weather data unavailable"
-      document.getElementById("weather-details").textContent = ""
-    })
-}
-
-function getWeatherIcon(code) {
-  const iconMap = {
-    0: "fas fa-sun",
-    1: "fas fa-sun",
-    2: "fas fa-cloud-sun",
-    3: "fas fa-cloud",
-    45: "fas fa-smog",
-    48: "fas fa-smog",
-    51: "fas fa-cloud-drizzle",
-    53: "fas fa-cloud-drizzle",
-    55: "fas fa-cloud-rain",
-    61: "fas fa-cloud-rain",
-    63: "fas fa-cloud-rain",
-    65: "fas fa-cloud-showers-heavy",
-    71: "fas fa-snowflake",
-    73: "fas fa-snowflake",
-    75: "fas fa-snowflake",
-    80: "fas fa-cloud-rain",
-    81: "fas fa-cloud-rain",
-    82: "fas fa-cloud-showers-heavy",
-    95: "fas fa-bolt",
-  }
-  return iconMap[code] || "fas fa-question"
-}
-
-// Settings modal functionality
-function initSettings() {
-  const settingsBtn = document.getElementById("settings-btn")
-  const settingsModal = document.getElementById("settings-modal")
-  const closeSettings = document.getElementById("close-settings")
-  const cancelSettings = document.getElementById("cancel-settings")
-  const saveSettings = document.getElementById("save-settings")
-
-  settingsBtn.addEventListener("click", () => {
-    settingsModal.classList.add("active")
-  })
-
-  closeSettings.addEventListener("click", () => {
-    settingsModal.classList.remove("active")
-  })
-
-  cancelSettings.addEventListener("click", () => {
-    settingsModal.classList.remove("active")
-  })
-
-  saveSettings.addEventListener("click", () => {
-    // Save settings logic here
-    settingsModal.classList.remove("active")
-    addAlert("success", "Settings", "Settings saved successfully")
-  })
-
-  // Close modal when clicking outside
-  settingsModal.addEventListener("click", (e) => {
-    if (e.target === settingsModal) {
-      settingsModal.classList.remove("active")
-    }
-  })
-}
-
-// Schedule management
-let schedules = [
-  { time: "06:00", duration: 30, enabled: true },
-  { time: "18:00", duration: 20, enabled: true },
-]
-let activeSchedule = null
-
-// Check schedules every minute
-function checkSchedules() {
-  const now = new Date()
-  const currentTime = now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0")
-
-  schedules.forEach((schedule, index) => {
-    if (schedule.enabled && schedule.time === currentTime && !activeSchedule) {
-      // Start scheduled watering
-      startScheduledWatering(schedule, index)
-    }
-  })
-}
-
-// Start scheduled watering
-async function startScheduledWatering(schedule, scheduleIndex) {
-  try {
-    activeSchedule = {
-      ...schedule,
-      index: scheduleIndex,
-      startTime: Date.now(),
-      endTime: Date.now() + schedule.duration * 60 * 1000,
-    }
-
-    // Set pump and manual override to true
-    await fetch(`${FIREBASE_URL}/controls.json`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        pump: true,
-        manual_override: true,
-        scheduled: true,
-      }),
-    })
-
-    updateControlMode("Scheduled")
-    addAlert("info", "Scheduled Watering", `Started ${schedule.duration} minute watering session`)
-
-    // Set timeout to stop watering
-    setTimeout(
-      () => {
-        stopScheduledWatering()
-      },
-      schedule.duration * 60 * 1000,
-    )
-  } catch (error) {
-    console.error("Failed to start scheduled watering:", error)
-  }
-}
-
-// Stop scheduled watering
-async function stopScheduledWatering() {
-  if (!activeSchedule) return
-
-  try {
-    await fetch(`${FIREBASE_URL}/controls.json`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        pump: false,
-        manual_override: false,
-        scheduled: false,
-      }),
-    })
-
-    const duration = Math.round((Date.now() - activeSchedule.startTime) / (1000 * 60))
-    addAlert("success", "Scheduled Watering Complete", `Watering completed after ${duration} minutes`)
-
-    activeSchedule = null
-    updateControlMode("Automatic")
-  } catch (error) {
-    console.error("Failed to stop scheduled watering:", error)
-  }
-}
-
-// Add schedule functionality to the UI
-function initSchedule() {
-  const scheduleBtn = document.getElementById("schedule-btn")
-  const scheduleSection = document.getElementById("control-schedule")
-
-  scheduleBtn.addEventListener("click", () => {
-    if (scheduleSection.style.display === "none") {
-      scheduleSection.style.display = "block"
-      scheduleBtn.innerHTML = '<i class="fas fa-calendar-times"></i> Hide Schedule <div class="btn-ripple"></div>'
-      renderSchedules()
-    } else {
-      scheduleSection.style.display = "none"
-      scheduleBtn.innerHTML = '<i class="fas fa-calendar-alt"></i> Schedule <div class="btn-ripple"></div>'
-    }
-  })
-}
-
-// Render schedules in the UI
-function renderSchedules() {
-  const scheduleSection = document.getElementById("control-schedule")
-  if (!scheduleSection) return
-
-  scheduleSection.innerHTML = `
-    <h4>Irrigation Schedule</h4>
-    <div id="schedule-list">
-      ${schedules
-        .map(
-          (schedule, index) => `
-        <div class="schedule-item" data-index="${index}">
-          <input type="time" value="${schedule.time}" onchange="updateScheduleTime(${index}, this.value)">
-          <span>Duration: </span>
-          <input type="number" value="${schedule.duration}" min="1" max="120" onchange="updateScheduleDuration(${index}, this.value)">
-          <span>min</span>
-          <label>
-            <input type="checkbox" ${schedule.enabled ? "checked" : ""} onchange="toggleSchedule(${index}, this.checked)">
-            Enabled
-          </label>
-          <button class="btn btn-sm btn-danger" onclick="removeSchedule(${index})">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      `,
-        )
-        .join("")}
-    </div>
-    <button class="btn btn-sm btn-primary" onclick="addNewSchedule()">
-      <i class="fas fa-plus"></i>
-      Add Schedule
-    </button>
-  `
-}
-
-// Schedule management functions
-function updateScheduleTime(index, time) {
-  schedules[index].time = time
-  saveSchedulesToLocalStorage()
-}
-
-function updateScheduleDuration(index, duration) {
-  schedules[index].duration = Number.parseInt(duration)
-  saveSchedulesToLocalStorage()
-}
-
-function toggleSchedule(index, enabled) {
-  schedules[index].enabled = enabled
-  saveSchedulesToLocalStorage()
-}
-
-function removeSchedule(index) {
-  schedules.splice(index, 1)
-  renderSchedules()
-  saveSchedulesToLocalStorage()
-}
-
-function addNewSchedule() {
-  schedules.push({
-    time: "12:00",
-    duration: 15,
-    enabled: true,
-  })
-  renderSchedules()
-  saveSchedulesToLocalStorage()
-}
-
-function saveSchedulesToLocalStorage() {
-  localStorage.setItem("aquaclima_schedules", JSON.stringify(schedules))
-}
-
-function loadSchedulesFromLocalStorage() {
-  const saved = localStorage.getItem("aquaclima_schedules")
-  if (saved) {
-    schedules = JSON.parse(saved)
-  }
-}
-
-// Button ripple effect
-function addRippleEffect() {
-  document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("control-btn")) {
-      const button = e.target
-      const ripple = button.querySelector(".btn-ripple")
-
-      if (ripple) {
-        const rect = button.getBoundingClientRect()
-        const size = Math.max(rect.width, rect.height)
-        const x = e.clientX - rect.left - size / 2
-        const y = e.clientY - rect.top - size / 2
-
-        ripple.style.width = ripple.style.height = size + "px"
-        ripple.style.left = x + "px"
-        ripple.style.top = y + "px"
-
-        ripple.classList.add("animate")
-        setTimeout(() => {
-          ripple.classList.remove("animate")
-        }, 600)
-      }
-    }
-  })
-}
-
-// Clear all alerts
-function initAlertsClear() {
-  const clearAlertsBtn = document.getElementById("clear-alerts")
-  if (clearAlertsBtn) {
-    clearAlertsBtn.addEventListener("click", () => {
-      const alertsList = document.getElementById("alerts-list")
-      if (alertsList) {
-        alertsList.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: 2rem;">No alerts</p>'
-        alertCount = 0
-        updateAlertBadge()
-      }
-    })
-  }
-}
-
-// Export data functionality
-function initDataExport() {
-  const exportBtn = document.getElementById("export-data")
-  if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
-      const csvContent =
-        "data:text/csv;charset=utf-8," +
-        "Timestamp,Soil Moisture,Air Humidity,Air Temperature,pH Level,Water Level\n" +
-        sensorHistory
-          .map(
-            (row) =>
-              `${row.timestamp},${row.soil || 0},${row.humidity || 0},${row.air_temp || 0},${row.ph || 0},${row.water_level || 0}`,
-          )
-          .join("\n")
-
-      const encodedUri = encodeURI(csvContent)
-      const link = document.createElement("a")
-      link.setAttribute("href", encodedUri)
-      link.setAttribute("download", `aquaclima_data_${new Date().toISOString().split("T")[0]}.csv`)
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      addAlert("success", "Data Export", "Data exported successfully")
-    })
-  }
-}
-
-// Update history table
-function updateHistoryTable() {
-  const tbody = document.getElementById("history-tbody")
-  if (!tbody) return
-
-  tbody.innerHTML = ""
-
-  // Show last 20 entries
-  const recentHistory = sensorHistory.slice(-20).reverse()
-
-  recentHistory.forEach((entry) => {
-    const row = document.createElement("tr")
-    row.innerHTML = `
-      <td>${new Date(entry.timestamp).toLocaleString()}</td>
-      <td>${entry.soil || "--"}%</td>
-      <td>${entry.humidity || "--"}%</td>
-      <td>${entry.air_temp || "--"}°C</td>
-      <td>${entry.ph ? entry.ph.toFixed(1) : "--"}</td>
-      <td>${entry.water_level || "--"}%</td>
-    `
-    tbody.appendChild(row)
-  })
-
-  if (recentHistory.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="6" style="text-align: center; color: var(--gray-500);">No data available</td></tr>'
-  }
-}
-
-// Refresh all data
-function refreshAllData() {
-  fetchSensorData()
-  fetchAIRecommendation()
-  fetchWeather()
-  fetchPumpStatus()
-  updateHistoryTable()
-}
-
-// Refresh button functionality
-document.getElementById("refresh-btn").addEventListener("click", function () {
-  refreshAllData()
-
-  // Add visual feedback
-  const icon = this.querySelector("i")
-  icon.style.transform = "rotate(360deg)"
-  icon.style.transition = "transform 0.5s ease"
-
-  setTimeout(() => {
-    icon.style.transform = ""
-  }, 500)
-
-  addAlert("info", "Data Refresh", "All data refreshed successfully")
-})
-
-// Initialize dashboard
-document.addEventListener("DOMContentLoaded", () => {
-  // Load schedules from localStorage
-  loadSchedulesFromLocalStorage()
-
-  // Initialize all components
-  initThemeToggle()
-  initTabs()
-  initSettings()
-  initSchedule()
-  addRippleEffect()
-  initAlertsClear()
-  initDataExport()
-
-  // Initial data fetch
-  refreshAllData()
-
-  // Set up periodic updates every 5 seconds
-  setInterval(refreshAllData, 5000)
-
-  // Check schedules every minute
-  setInterval(checkSchedules, 60000)
-
-  // Update pump runtime display every second when pump is running
-  setInterval(() => {
-    if (lastPumpState) {
-      updatePumpStatus(true) // This will update the runtime display
-    }
-  }, 1000)
-
-  // Add smooth animations to cards
-  const cards = document.querySelectorAll(".sensor-card, .status-card, .info-card")
-  cards.forEach((card, index) => {
-    card.style.opacity = "0"
-    card.style.transform = "translateY(20px)"
-
-    setTimeout(() => {
-      card.style.transition = "all 0.5s ease"
-      card.style.opacity = "1"
-      card.style.transform = "translateY(0)"
-    }, index * 100)
-  })
-
-  // Add some initial alerts for demo
-  setTimeout(() => {
-    addAlert("info", "System Started", "AQUACLIMA dashboard initialized successfully")
-  }, 3000)
-})
