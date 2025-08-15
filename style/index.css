@@ -247,19 +247,18 @@ body {
 
 /* Header */
 .header {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(25px) saturate(180%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--gray-200);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 100;
   transition: all var(--transition-normal);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="dark"] .header {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.95);
   border-bottom-color: var(--gray-200);
 }
 
@@ -343,16 +342,17 @@ body {
 
 /* Navigation Tabs */
 .nav-tabs {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--gray-200);
   position: sticky;
-  top: 80px;
+  top: 85px;
   z-index: 90;
   transition: all var(--transition-normal);
 }
 
 [data-theme="dark"] .nav-tabs {
-  background: var(--gray-100);
+  background: rgba(30, 41, 59, 0.9);
   border-bottom-color: var(--gray-200);
 }
 
