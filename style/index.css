@@ -793,17 +793,10 @@ body {
   font-weight: 800;
   color: var(--primary-color);
   margin-bottom: var(--spacing-sm);
-  background: linear-gradient(135deg, var(--primary-color), var(--success-color), var(--info-color));
-  background-size: 200% 200%;
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradientText 3s ease infinite;
-}
-
-@keyframes gradientText {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 .sensor-status {
@@ -1079,24 +1072,26 @@ body {
 }
 
 .info-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--gray-200);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
 }
 
 [data-theme="dark"] .info-card {
-  background: var(--gray-100);
-  border-color: var(--gray-200);
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .info-card:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .info-header {
