@@ -247,24 +247,19 @@ body {
 
 /* Header */
 .header {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-cool);
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 100;
   transition: all var(--transition-normal);
-  border-bottom: 2px solid transparent;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), var(--gradient-cool);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
 }
 
 [data-theme="dark"] .header {
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.95);
   border-bottom-color: var(--gray-200);
-  background-image: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)), var(--gradient-cool);
 }
 
 .header-container {
@@ -764,17 +759,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--gray-50);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--gray-200);
-  color: var(--primary-color);
+  background: var(--gradient-cool);
+  border-radius: var(--radius-xl);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
   transition: all var(--transition-normal);
+  box-shadow: var(--shadow-glow);
+  backdrop-filter: blur(10px);
 }
 
 .sensor-card:hover .sensor-icon {
-  background: var(--primary-color);
+  background: var(--gradient-neon);
   color: white;
-  transform: scale(1.1);
+  transform: scale(1.2) rotate(360deg);
+  box-shadow: var(--shadow-neon);
 }
 
 .sensor-header h3 {
