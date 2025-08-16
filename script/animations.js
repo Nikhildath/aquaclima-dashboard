@@ -398,6 +398,9 @@ class ProgressAnimations {
     const counters = document.querySelectorAll('.sensor-value');
     
     counters.forEach(counter => {
+    }
+    )
+  }
 }
 
 // Water flow animation
