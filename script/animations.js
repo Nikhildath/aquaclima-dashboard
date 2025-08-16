@@ -1,9 +1,11 @@
 // Advanced animations and visual effects for AQUACLIMA dashboard
 
+// Enhanced particle system with multiple layers
 // Particle system for floating background elements
 class ParticleSystem {
   constructor() {
     this.particles = [];
+    this.floatingElements = [];
     this.canvas = null;
     this.ctx = null;
     this.init();
@@ -19,13 +21,14 @@ class ParticleSystem {
     this.canvas.style.height = '100%';
     this.canvas.style.pointerEvents = 'none';
     this.canvas.style.zIndex = '-1';
-    this.canvas.style.opacity = '0.1';
+    this.canvas.style.opacity = '0.15';
     
     document.body.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
     
     this.resize();
     this.createParticles();
+    this.createFloatingElements();
     this.animate();
     
     window.addEventListener('resize', () => this.resize());
@@ -37,28 +40,67 @@ class ParticleSystem {
   }
 
   createParticles() {
-    const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 15000);
+    const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 12000);
     
     for (let i = 0; i < particleCount; i++) {
       this.particles.push({
         x: Math.random() * this.canvas.width,
         y: Math.random() * this.canvas.height,
-        size: Math.random() * 3 + 1,
-        speedX: (Math.random() - 0.5) * 0.5,
-        speedY: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.5 + 0.2,
-        color: `hsl(${200 + Math.random() * 60}, 70%, 60%)`
+        size: Math.random() * 4 + 1,
+        speedX: (Math.random() - 0.5) * 0.8,
+        speedY: (Math.random() - 0.5) * 0.8,
+        opacity: Math.random() * 0.6 + 0.3,
+        color: `hsl(${200 + Math.random() * 80}, 70%, 60%)`,
+        pulse: Math.random() * Math.PI * 2
       });
     }
   }
 
+  createFloatingElements() {
+    const elementCount = Math.floor(window.innerWidth / 400);
+    
+    for (let i = 0; i < elementCount; i++) {
+      this.floatingElements.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        size: Math.random() * 60 + 40,
+        speedX: (Math.random() - 0.5) * 0.3,
+        speedY: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.1 + 0.05,
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 0.5,
+        color: `hsl(${180 + Math.random() * 100}, 60%, 70%)`
+      });
+    }
+  }
   animate() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Animate floating elements
+    this.floatingElements.forEach(element => {
+      element.x += element.speedX;
+      element.y += element.speedY;
+      element.rotation += element.rotationSpeed;
+      
+      if (element.x < -element.size) element.x = this.canvas.width + element.size;
+      if (element.x > this.canvas.width + element.size) element.x = -element.size;
+      if (element.y < -element.size) element.y = this.canvas.height + element.size;
+      if (element.y > this.canvas.height + element.size) element.y = -element.size;
+      
+      this.ctx.save();
+      this.ctx.translate(element.x, element.y);
+      this.ctx.rotate(element.rotation * Math.PI / 180);
+      this.ctx.globalAlpha = element.opacity;
+      this.ctx.fillStyle = element.color;
+      this.ctx.fillRect(-element.size/2, -element.size/2, element.size, element.size);
+      this.ctx.restore();
+    });
     
     this.particles.forEach(particle => {
       // Update position
       particle.x += particle.speedX;
       particle.y += particle.speedY;
+      particle.pulse += 0.02;
       
       // Wrap around edges
       if (particle.x < 0) particle.x = this.canvas.width;
@@ -66,22 +108,34 @@ class ParticleSystem {
       if (particle.y < 0) particle.y = this.canvas.height;
       if (particle.y > this.canvas.height) particle.y = 0;
       
+      // Pulsing effect
+      const pulseSize = particle.size + Math.sin(particle.pulse) * 0.5;
+      const pulseOpacity = particle.opacity + Math.sin(particle.pulse) * 0.1;
+      
       // Draw particle
       this.ctx.beginPath();
-      this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      this.ctx.arc(particle.x, particle.y, pulseSize, 0, Math.PI * 2);
       this.ctx.fillStyle = particle.color;
-      this.ctx.globalAlpha = particle.opacity;
+      this.ctx.globalAlpha = pulseOpacity;
       this.ctx.fill();
+      
+      // Add glow effect
+      this.ctx.shadowColor = particle.color;
+      this.ctx.shadowBlur = 10;
+      this.ctx.fill();
+      this.ctx.shadowBlur = 0;
     });
     
     requestAnimationFrame(() => this.animate());
   }
 }
 
+// Enhanced scroll animations with stagger effect
 // Smooth scroll animations
 class ScrollAnimations {
   constructor() {
     this.observedElements = new Set();
+    this.animationQueue = [];
     this.init();
   }
 
@@ -90,7 +144,7 @@ class ScrollAnimations {
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
+            this.queueAnimation(entry.target);
           }
         });
       },
@@ -100,6 +154,15 @@ class ScrollAnimations {
     this.observeElements();
   }
 
+  queueAnimation(element) {
+    const delay = this.animationQueue.length * 100;
+    this.animationQueue.push(element);
+    
+    setTimeout(() => {
+      element.classList.add('animate-in');
+      this.animationQueue = this.animationQueue.filter(el => el !== element);
+    }, delay);
+  }
   observeElements() {
     const elements = document.querySelectorAll('.sensor-card, .status-card, .info-card, .control-panel');
     elements.forEach(el => {
@@ -112,28 +175,40 @@ class ScrollAnimations {
   }
 }
 
+// Enhanced hover effects with 3D transforms
 // Advanced hover effects
 class HoverEffects {
   constructor() {
+    this.mousePosition = { x: 0, y: 0 };
     this.init();
   }
 
   init() {
+    this.trackMouse();
     this.addCardHoverEffects();
     this.addButtonHoverEffects();
     this.addIconAnimations();
+    this.addMagneticEffects();
   }
 
+  trackMouse() {
+    document.addEventListener('mousemove', (e) => {
+      this.mousePosition.x = e.clientX;
+      this.mousePosition.y = e.clientY;
+    });
+  }
   addCardHoverEffects() {
     const cards = document.querySelectorAll('.sensor-card, .status-card, .info-card');
     
     cards.forEach(card => {
       card.addEventListener('mouseenter', (e) => {
         this.createHoverGlow(e.target);
+        this.addParallaxEffect(e.target);
       });
       
       card.addEventListener('mouseleave', (e) => {
         this.removeHoverGlow(e.target);
+        this.removeParallaxEffect(e.target);
       });
       
       card.addEventListener('mousemove', (e) => {
@@ -145,7 +220,7 @@ class HoverEffects {
   createHoverGlow(element) {
     const glow = element.querySelector('.card-glow');
     if (glow) {
-      glow.style.opacity = '0.1';
+      glow.style.opacity = '0.15';
     }
   }
 
@@ -159,6 +234,19 @@ class HoverEffects {
     element.style.transform = '';
   }
 
+  addParallaxEffect(element) {
+    const children = element.querySelectorAll('.sensor-icon, .info-icon, .sensor-value');
+    children.forEach(child => {
+      child.style.transition = 'transform 0.3s ease';
+    });
+  }
+
+  removeParallaxEffect(element) {
+    const children = element.querySelectorAll('.sensor-icon, .info-icon, .sensor-value');
+    children.forEach(child => {
+      child.style.transform = '';
+    });
+  }
   updateCardTilt(e) {
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
@@ -168,10 +256,17 @@ class HoverEffects {
     const deltaX = (e.clientX - centerX) / (rect.width / 2);
     const deltaY = (e.clientY - centerY) / (rect.height / 2);
     
-    const tiltX = deltaY * 5;
-    const tiltY = deltaX * -5;
+    const tiltX = deltaY * 8;
+    const tiltY = deltaX * -8;
     
-    card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(10px)`;
+    card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(20px)`;
+    
+    // Parallax effect on child elements
+    const children = card.querySelectorAll('.sensor-icon, .info-icon, .sensor-value');
+    children.forEach((child, index) => {
+      const depth = (index + 1) * 5;
+      child.style.transform = `translateZ(${depth}px) translateX(${deltaX * 3}px) translateY(${deltaY * 3}px)`;
+    });
   }
 
   addButtonHoverEffects() {
@@ -179,11 +274,19 @@ class HoverEffects {
     
     buttons.forEach(button => {
       button.addEventListener('mouseenter', () => {
-        button.style.transform = 'translateY(-2px) scale(1.02)';
+        button.style.transform = 'translateY(-3px) scale(1.05)';
       });
       
       button.addEventListener('mouseleave', () => {
         button.style.transform = '';
+      });
+      
+      button.addEventListener('mousedown', () => {
+        button.style.transform = 'translateY(-1px) scale(1.02)';
+      });
+      
+      button.addEventListener('mouseup', () => {
+        button.style.transform = 'translateY(-3px) scale(1.05)';
       });
     });
   }
@@ -193,7 +296,7 @@ class HoverEffects {
     
     icons.forEach(icon => {
       icon.addEventListener('mouseenter', () => {
-        icon.style.transform = 'scale(1.1) rotate(5deg)';
+        icon.style.transform = 'scale(1.2) rotate(10deg)';
       });
       
       icon.addEventListener('mouseleave', () => {
@@ -201,17 +304,41 @@ class HoverEffects {
       });
     });
   }
+
+  addMagneticEffects() {
+    const magneticElements = document.querySelectorAll('.btn-primary, .btn-success, .btn-danger');
+    
+    magneticElements.forEach(element => {
+      element.addEventListener('mousemove', (e) => {
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        const deltaX = (e.clientX - centerX) * 0.1;
+        const deltaY = (e.clientY - centerY) * 0.1;
+        
+        element.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.05)`;
+      });
+      
+      element.addEventListener('mouseleave', () => {
+        element.style.transform = '';
+      });
+    });
+  }
 }
 
+// Enhanced progress animations with spring physics
 // Progress animations
 class ProgressAnimations {
   constructor() {
+    this.springConfig = { tension: 120, friction: 14 };
     this.init();
   }
 
   init() {
     this.animateProgressRings();
     this.animateProgressBars();
+    this.animateCounters();
   }
 
   animateProgressRings() {
@@ -235,7 +362,7 @@ class ProgressAnimations {
     ring.style.strokeDashoffset = circumference;
     
     setTimeout(() => {
-      ring.style.transition = 'stroke-dashoffset 1.5s ease-out';
+      ring.style.transition = 'stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1)';
       const targetOffset = ring.style.strokeDashoffset || circumference;
       ring.style.strokeDashoffset = targetOffset;
     }, 100);
@@ -262,10 +389,15 @@ class ProgressAnimations {
     bar.style.width = '0%';
     
     setTimeout(() => {
-      bar.style.transition = 'width 1.2s ease-out';
+      bar.style.transition = 'width 1.8s cubic-bezier(0.4, 0, 0.2, 1)';
       bar.style.width = targetWidth;
     }, 200);
   }
+
+  animateCounters() {
+    const counters = document.querySelectorAll('.sensor-value');
+    
+    counters.forEach(counter => {
 }
 
 // Water flow animation
