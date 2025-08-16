@@ -362,7 +362,7 @@ class ProgressAnimations {
     ring.style.strokeDashoffset = circumference;
     
     setTimeout(() => {
-      ring.style.transition = 'stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1)';
+      ring.style.transition = 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
       const targetOffset = ring.style.strokeDashoffset || circumference;
       ring.style.strokeDashoffset = targetOffset;
     }, 100);
@@ -389,7 +389,7 @@ class ProgressAnimations {
     bar.style.width = '0%';
     
     setTimeout(() => {
-      bar.style.transition = 'width 1.8s cubic-bezier(0.4, 0, 0.2, 1)';
+      bar.style.transition = 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
       bar.style.width = targetWidth;
     }, 200);
   }
@@ -398,8 +398,7 @@ class ProgressAnimations {
     const counters = document.querySelectorAll('.sensor-value');
     
     counters.forEach(counter => {
-    }
-    )
+    });
   }
 }
 
@@ -438,7 +437,7 @@ class WaterFlowAnimation {
         top: 50%;
         left: -10px;
         transform: translateY(-50%);
-        animation: flow 3s infinite linear;
+        animation: flow 1.5s infinite linear;
         animation-delay: ${i * 1}s;
         opacity: 0.7;
       `;
@@ -478,7 +477,7 @@ class NotificationAnimations {
 
   animateNotification(notification) {
     if (notification.style.display === 'flex') {
-      notification.style.animation = 'slideInRight 0.4s ease-out';
+      notification.style.animation = 'slideInRight 0.2s ease-out';
     }
   }
 }
@@ -517,7 +516,7 @@ class LoadingAnimations {
         )
       `;
       skeleton.style.backgroundSize = '200% 100%';
-      skeleton.style.animation = 'skeleton-loading 1.5s infinite';
+      skeleton.style.animation = 'skeleton-loading 0.8s infinite';
     });
   }
 }
@@ -554,7 +553,7 @@ class ChartAnimations {
     chart.style.transform = 'scale(0.8)';
     
     setTimeout(() => {
-      chart.style.transition = 'all 0.8s ease-out';
+      chart.style.transition = 'all 0.4s ease-out';
       chart.style.opacity = '1';
       chart.style.transform = 'scale(1)';
     }, 100);
@@ -591,7 +590,7 @@ function addAnimationStyles() {
     .animate-on-scroll {
       opacity: 0;
       transform: translateY(30px);
-      transition: all 0.6s ease-out;
+      transition: all 0.3s ease-out;
     }
 
     .animate-on-scroll.animate-in {
@@ -613,7 +612,7 @@ function addAnimationStyles() {
       border: 3px solid var(--gray-200);
       border-top: 3px solid var(--primary-color);
       border-radius: 50%;
-      animation: spin 1s linear infinite;
+      animation: spin 0.6s linear infinite;
     }
 
     @keyframes spin {
@@ -639,27 +638,27 @@ function addAnimationStyles() {
     }
 
     .progress-ring-fill {
-      transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .gauge-fill, .confidence-fill, .aqi-fill {
-      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .water-fill {
-      transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .ph-indicator {
-      transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .battery-level {
-      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .pump-animation.active {
-      animation: pump-pulse 1.5s infinite ease-in-out;
+      animation: pump-pulse 0.8s infinite ease-in-out;
     }
 
     @keyframes pump-pulse {
@@ -674,7 +673,7 @@ function addAnimationStyles() {
     }
 
     .thinking-dot {
-      animation: thinking 1.4s infinite ease-in-out;
+      animation: thinking 0.8s infinite ease-in-out;
     }
 
     @keyframes thinking {
@@ -689,7 +688,7 @@ function addAnimationStyles() {
     }
 
     .alert-badge {
-      animation: badge-pulse 2s infinite;
+      animation: badge-pulse 1s infinite;
     }
 
     @keyframes badge-pulse {
@@ -698,7 +697,7 @@ function addAnimationStyles() {
     }
 
     .status-indicator.active::after {
-      animation: status-pulse 2s infinite;
+      animation: status-pulse 1s infinite;
     }
 
     @keyframes status-pulse {
